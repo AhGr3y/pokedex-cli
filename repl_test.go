@@ -26,7 +26,7 @@ func TestCleanInput(t *testing.T) {
 			output := cleanInput(c.input)
 
 			if len(output) != len(c.expected) {
-				t.Errorf("unequal slice length: len(output): %d != len(c.expected): %d", len(output), len(c.expected))
+				t.Errorf("len(output): %d != len(c.expected): %d", len(output), len(c.expected))
 			} else {
 				for i := range c.expected {
 					if output[i] != c.expected[i] {
