@@ -19,6 +19,10 @@ func TestCleanInput(t *testing.T) {
 			input:    "   Hello   World   ",
 			expected: []string{"hello", "world"},
 		},
+		"with special characters": {
+			input:    "  @hEllo ,wOrld#   ",
+			expected: []string{"@hello", ",world#"},
+		},
 	}
 
 	for name, c := range cases {
