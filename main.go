@@ -3,9 +3,25 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
+
+type cliCommand struct {
+	name        string
+	description string
+	callback    func() error
+}
+
+// define commands
+var commandMap = map[string]cliCommand{
+	"exit": {
+		name:        "exit",
+		description: "Exit the Pokedex",
+		callback:    commandExit,
+	},
+}
 
 func main() {
 	// start REPL
@@ -17,31 +33,29 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		if err := scanner.Err(); err != nil {
-			fmt.Printf("error reading user input: %w", err)
+			fmt.Printf("error reading user input: %v", err)
 			os.Exit(0)
 		}
 
 		// handle user input
 		cleanInputs := cleanInput(scanner.Text())
 		if len(cleanInputs) == 0 {
-			// do nothing
+			continue
 		} else {
-			firstCommand := cleanInputs[0]
-			if firstCommand == "exit" { // handle 'exit' command
-				if len(cleanInputs) == 1 {
-					fmt.Println("Goodbye!")
-					os.Exit(0)
-				} else { // handle 'exit' command with options
-					var options string
-					for i := 1; i < len(cleanInputs); i++ {
-						options += " " + cleanInputs[i]
-					}
-					fmt.Printf("unrecognized options for '%s' command:%s\n", firstCommand, options)
-				}
-			} else { // handle other commands
-				// handle other commands
-				fmt.Printf("Your command was: %s\n", firstCommand)
+			userCommand := cleanInputs[0]
+
+			// check if command exists
+			command, ok := commandMap[userCommand]
+			if !ok {
+				fmt.Println("Unknown command")
+				continue
 			}
+
+			// execute command
+			if err := command.callback(); err != nil {
+				log.Fatalf("error during callback: %v", err)
+			}
+
 		}
 
 	}
@@ -49,4 +63,10 @@ func main() {
 
 func cleanInput(text string) []string {
 	return strings.Fields(strings.ToLower(text))
+}
+
+func commandExit() error {
+	fmt.Println("Closing the Pokedex... Goodbye!")
+	os.Exit(0)
+	return nil
 }
