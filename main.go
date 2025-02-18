@@ -14,48 +14,64 @@ type cliCommand struct {
 	callback    func() error
 }
 
-// define commands
-var commandMap = map[string]cliCommand{
-	"exit": {
-		name:        "exit",
-		description: "Exit the Pokedex",
-		callback:    commandExit,
-	},
+var commandMap map[string]cliCommand
+
+func init() {
+	// Define commands
+	commandMap = map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Display help message",
+			callback:    commandHelp,
+		},
+	}
 }
 
 func main() {
-	// start REPL
+	// Initialize scanner
+	scanner := bufio.NewScanner(os.Stdin)
+
+	// Start REPL
 	for {
-		// command line prompt
+		// Prompt user to input data
 		fmt.Print("Pokedex > ")
 
-		// get user input
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		if err := scanner.Err(); err != nil {
-			fmt.Printf("error reading user input: %v", err)
-			os.Exit(0)
+		// Read user input
+		if !scanner.Scan() {
+			// Handle EOF (e.g. Ctrl+D) or scanner failure
+			fmt.Println("\nClosing the Pokedex... Goodbye!")
+			break
 		}
 
-		// handle user input
+		if err := scanner.Err(); err != nil {
+			fmt.Printf("Error reading user input: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Clean user input
 		cleanInputs := cleanInput(scanner.Text())
+
+		// Handle empty inputs
 		if len(cleanInputs) == 0 {
 			continue
-		} else {
-			userCommand := cleanInputs[0]
+		}
 
-			// check if command exists
-			command, ok := commandMap[userCommand]
-			if !ok {
-				fmt.Println("Unknown command")
-				continue
-			}
+		// Check if command exists
+		userCommand := cleanInputs[0]
+		command, ok := commandMap[userCommand]
+		if !ok {
+			fmt.Println("Unknown command")
+			continue
+		}
 
-			// execute command
-			if err := command.callback(); err != nil {
-				log.Fatalf("error during callback: %v", err)
-			}
-
+		// Execute command
+		if err := command.callback(); err != nil {
+			log.Fatalf("error during callback: %v", err)
 		}
 
 	}
@@ -68,5 +84,21 @@ func cleanInput(text string) []string {
 func commandExit() error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
+	return nil
+}
+
+func commandHelp() error {
+	commands := ""
+	for _, v := range commandMap {
+		commands += fmt.Sprintf("\n%s: %s", v.name, v.description)
+	}
+
+	helpMessage := fmt.Sprintf(`
+Welcome to the Pokedex!
+Usage:
+%s
+`, commands)
+
+	fmt.Println(helpMessage)
 	return nil
 }
