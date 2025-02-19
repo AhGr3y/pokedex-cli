@@ -48,6 +48,35 @@ func (c *Config) UpdateOnMap(nextURL *url.URL) error {
 	return nil
 }
 
+func (c *Config) UpdateOnMapb(prevURL *url.URL) error {
+	if prevURL == nil {
+		return ErrNilURL
+	}
+
+	// Get query offset of prevURL
+	prevURLOffset, err := getOffsetFromURL(prevURL)
+	if err != nil {
+		return err
+	}
+
+	// Update c.Next and c.Prev based on prevURLOffset
+	nextURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, prevURLOffset+20)
+	nextURL, err := url.Parse(nextURLString)
+	if err != nil {
+		return fmt.Errorf("error parsing string to url: %w", err)
+	}
+	c.Next = nextURL
+
+	prevPrevURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, prevURLOffset-20)
+	prevPrevURL, err := url.Parse(prevPrevURLString)
+	if err != nil {
+		return fmt.Errorf("error parsing string to url: %w", err)
+	}
+	c.Prev = prevPrevURL
+
+	return nil
+}
+
 func getOffsetFromURL(url *url.URL) (int, error) {
 	if url == nil {
 		return 0, ErrNilURL

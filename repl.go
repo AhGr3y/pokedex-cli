@@ -103,5 +103,10 @@ func getCommands() map[string]cliCommand {
 			description: "List next location area",
 			callback:    commandMap,
 		},
+		"mapb": {
+			name:        "mapb",
+			description: "List previous location area",
+			callback:    commandMapb,
+		},
 	}
 }

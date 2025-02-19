@@ -26,3 +26,24 @@ func commandMap(config *pokeapi.Config) error {
 
 	return nil
 }
+
+func commandMapb(config *pokeapi.Config) error {
+	// Get locations using pokeapi
+	locations, err := pokeapi.GetLocations(config.Prev)
+	if err != nil {
+		return fmt.Errorf("error getting location: %w", err)
+	}
+
+	// Update config's next and prev url
+	err = config.UpdateOnMapb(config.Prev)
+	if err != nil {
+		return fmt.Errorf("error updating config on map: %w", err)
+	}
+
+	// Display location names to std.out
+	for _, location := range locations {
+		fmt.Println(location.Name)
+	}
+
+	return nil
+}
