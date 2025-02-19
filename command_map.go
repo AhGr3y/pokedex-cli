@@ -1,15 +1,22 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
 )
 
 func commandMap(config *pokeapi.Config) error {
+	fmt.Printf("prev: %v next: %v\n", config.Prev, config.Next)
 	// Get locations using pokeapi
 	locations, err := pokeapi.GetLocations(config.Next)
 	if err != nil {
+		// Prevent map if user on last page
+		if errors.Is(err, pokeapi.ErrEndOfMap) {
+			fmt.Println("You're on the last page!")
+			return nil
+		}
 		return fmt.Errorf("error getting location: %w", err)
 	}
 
@@ -24,13 +31,20 @@ func commandMap(config *pokeapi.Config) error {
 		fmt.Println(location.Name)
 	}
 
+	fmt.Printf("prev: %v next: %v\n", config.Prev, config.Next)
 	return nil
 }
 
 func commandMapb(config *pokeapi.Config) error {
+	fmt.Printf("prev: %v next: %v\n", config.Prev, config.Next)
 	// Get locations using pokeapi
 	locations, err := pokeapi.GetLocations(config.Prev)
 	if err != nil {
+		// Prevent map back if user on fisrt page
+		if errors.Is(err, pokeapi.ErrEndOfMap) {
+			fmt.Println("You're on the first page!")
+			return nil
+		}
 		return fmt.Errorf("error getting location: %w", err)
 	}
 
@@ -45,5 +59,6 @@ func commandMapb(config *pokeapi.Config) error {
 		fmt.Println(location.Name)
 	}
 
+	fmt.Printf("prev: %v next: %v\n", config.Prev, config.Next)
 	return nil
 }

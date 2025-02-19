@@ -23,6 +23,11 @@ type Location struct {
 }
 
 func GetLocations(locationURL *url.URL) ([]Location, error) {
+	// Will only be nil when user at first or last page
+	if locationURL == nil {
+		return nil, ErrEndOfMap
+	}
+
 	// Retrieve location data from PokeAPI
 	resp, err := http.Get(locationURL.String())
 	if err != nil {

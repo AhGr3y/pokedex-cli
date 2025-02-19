@@ -12,6 +12,7 @@ import (
 var ErrNilURL = errors.New("url is nil")
 var ErrURLWithoutOffset = errors.New("url does not have offset query")
 var ErrEmptyQueryParameter = errors.New("empty query parameter")
+var ErrEndOfMap = errors.New("reached end of map")
 
 type Config struct {
 	LocationCount int
@@ -31,19 +32,28 @@ func (c *Config) UpdateOnMap(nextURL *url.URL) error {
 	}
 
 	// Update c.Next and c.Prev based on nextURLOffset
-	prevURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, nextURLOffset-20)
-	prevURL, err := url.Parse(prevURLString)
-	if err != nil {
-		return fmt.Errorf("error parsing string to url: %w", err)
+	if nextURLOffset == 0 { // Will only occur when user execute map for the first time
+		c.Prev = nil
+	} else {
+		prevURLString := fmt.Sprintf("%slocation-area/?offset=%d&limit=20", BaseURL, nextURLOffset-20)
+		prevURL, err := url.Parse(prevURLString)
+		if err != nil {
+			return fmt.Errorf("error parsing string to url: %w", err)
+		}
+		c.Prev = prevURL
 	}
-	c.Prev = prevURL
 
-	nextNextURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, nextURLOffset+20)
-	nextNextURL, err := url.Parse(nextNextURLString)
-	if err != nil {
-		return fmt.Errorf("error parsing string to url: %w", err)
+	// c.Next will be nil if user on last page
+	if nextURLOffset+20 >= c.LocationCount {
+		c.Next = nil
+	} else {
+		nextNextURLString := fmt.Sprintf("%slocation-area/?offset=%d&limit=20", BaseURL, nextURLOffset+20)
+		nextNextURL, err := url.Parse(nextNextURLString)
+		if err != nil {
+			return fmt.Errorf("error parsing string to url: %w", err)
+		}
+		c.Next = nextNextURL
 	}
-	c.Next = nextNextURL
 
 	return nil
 }
@@ -59,20 +69,34 @@ func (c *Config) UpdateOnMapb(prevURL *url.URL) error {
 		return err
 	}
 
+	// Prevent map back if user on first page
+	if c.Prev == nil {
+		return ErrEndOfMap
+	}
+
 	// Update c.Next and c.Prev based on prevURLOffset
-	nextURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, prevURLOffset+20)
+	nextURLString := fmt.Sprintf("%slocation-area/?offset=%d&limit=20", BaseURL, prevURLOffset+20)
 	nextURL, err := url.Parse(nextURLString)
 	if err != nil {
 		return fmt.Errorf("error parsing string to url: %w", err)
 	}
 	c.Next = nextURL
 
-	prevPrevURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, prevURLOffset-20)
-	prevPrevURL, err := url.Parse(prevPrevURLString)
-	if err != nil {
-		return fmt.Errorf("error parsing string to url: %w", err)
+	if prevURLOffset <= 0 { // c.Prev will be nil if user on first page
+		c.Prev = nil
+	} else {
+		var prevPrevURLString string
+		if prevURLOffset >= 1 && prevURLOffset <= 20 { // c.Prev will be set to 0 to prevent negative offset value
+			prevPrevURLString = fmt.Sprintf("%slocation-area/?offset=0&limit=20", BaseURL)
+		} else {
+			prevPrevURLString = fmt.Sprintf("%slocation-area/?offset=%d&limit=20", BaseURL, prevURLOffset-20)
+		}
+		prevPrevURL, err := url.Parse(prevPrevURLString)
+		if err != nil {
+			return fmt.Errorf("error parsing string to url: %w", err)
+		}
+		c.Prev = prevPrevURL
 	}
-	c.Prev = prevPrevURL
 
 	return nil
 }
