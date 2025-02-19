@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
 )
 
-func commandHelp(config *pokeapi.Config) error {
+func commandHelp(config *config) error {
 	var commandUsageText string
 	for _, v := range getCommands() {
 		commandUsageText += fmt.Sprintf("\n%s: %s", v.name, v.description)

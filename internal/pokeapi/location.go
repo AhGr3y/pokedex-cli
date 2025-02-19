@@ -4,69 +4,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 type LocationData struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous any    `json:"previous"`
+	Count    int     `json:"count"`
+	Next     *string `json:"next"`
+	Previous *string `json:"previous"`
 	Results  []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"results"`
 }
 
-type Location struct {
-	Name string
-	URL  string
-}
-
-func GetLocations(locationURL *url.URL) ([]Location, error) {
-	// Will only be nil when user at first or last page
-	if locationURL == nil {
-		return nil, ErrEndOfMap
+func (pc PokeClient) GetLocationData(url *string) (LocationData, error) {
+	fullURL := baseURL + "location-area/"
+	if url != nil {
+		fullURL = *url
 	}
 
-	// Retrieve location data from PokeAPI
-	resp, err := http.Get(locationURL.String())
+	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching resource: %w", err)
+		return LocationData{}, fmt.Errorf("error creating request: %w", err)
 	}
-	defer resp.Body.Close()
 
-	// Decode json data into LocationData struct
+	res, err := pc.Client.Do(req)
+	if err != nil {
+		return LocationData{}, fmt.Errorf("error doing request: %w", err)
+	}
+	defer res.Body.Close()
+
 	var locationData LocationData
-	decoder := json.NewDecoder(resp.Body)
+	decoder := json.NewDecoder(res.Body)
 	err = decoder.Decode(&locationData)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding json data: %w", err)
+		return LocationData{}, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	// Convert locationData.Results to []Location struct type
-	var locations []Location
-	for _, result := range locationData.Results {
-		locations = append(locations, Location{Name: result.Name, URL: result.URL})
-	}
-
-	return locations, nil
-}
-
-func GetLocationCount() (int, error) {
-	// Retrieve location data from PokeAPI
-	resp, err := http.Get(BaseURL + "location-area/")
-	if err != nil {
-		return 0, fmt.Errorf("error fetching resource: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Decode json data into LocationData struct
-	var locationData LocationData
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&locationData)
-	if err != nil {
-		return 0, fmt.Errorf("error decoding json data: %w", err)
-	}
-
-	return locationData.Count, nil
+	return locationData, nil
 }

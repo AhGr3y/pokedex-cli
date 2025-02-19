@@ -4,33 +4,19 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"net/url"
 	"os"
 	"strings"
 
 	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
 )
 
-func startRepl() {
-	// Initialize config
-	defaultLocationURL, err := url.Parse(pokeapi.BaseURL + "location-area/?offset=0&limit=20")
-	if err != nil {
-		fmt.Printf("Error parsing URL: %v", err)
-		os.Exit(1)
-	}
+type config struct {
+	pokeapiClient pokeapi.PokeClient
+	nextURL       *string
+	prevURL       *string
+}
 
-	locationCount, err := pokeapi.GetLocationCount()
-	if err != nil {
-		fmt.Printf("Error retrieving location count: %v", err)
-		os.Exit(1)
-	}
-
-	config := &pokeapi.Config{
-		LocationCount: locationCount,
-		Next:          defaultLocationURL,
-		Prev:          nil,
-	}
-
+func startRepl(config *config) {
 	// Initialize scanner
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -83,7 +69,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config) error
+	callback    func(*config) error
 }
 
 func getCommands() map[string]cliCommand {
