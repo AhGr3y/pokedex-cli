@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
 )
 
-func commandExit() error {
+func commandExit(config *pokeapi.Config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil

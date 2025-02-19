@@ -1,18 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
 
-func commandHelp() error {
-	commands := ""
+	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
+)
+
+func commandHelp(config *pokeapi.Config) error {
+	var commandUsageText string
 	for _, v := range getCommands() {
-		commands += fmt.Sprintf("\n%s: %s", v.name, v.description)
+		commandUsageText += fmt.Sprintf("\n%s: %s", v.name, v.description)
 	}
 
+	// Create help message format
 	helpMessage := fmt.Sprintf(`
 Welcome to the Pokedex!
 Usage:
 %s
-`, commands)
+`, commandUsageText)
 
 	fmt.Println(helpMessage)
 	return nil

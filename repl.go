@@ -4,11 +4,26 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
+
+	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
 )
 
 func startRepl() {
+	// Initialize config
+	defaultLocationURL, err := url.Parse(pokeapi.BaseURL + "location-area/")
+	if err != nil {
+		fmt.Printf("Error parsing URL: %v", err)
+		os.Exit(1)
+	}
+
+	config := &pokeapi.Config{
+		Next: defaultLocationURL,
+		Prev: nil,
+	}
+
 	// Initialize scanner
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -47,7 +62,7 @@ func startRepl() {
 		}
 
 		// Execute command
-		if err := commandObj.callback(); err != nil {
+		if err := commandObj.callback(config); err != nil {
 			log.Fatalf("error during callback: %v", err)
 		}
 
@@ -61,7 +76,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*pokeapi.Config) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -75,6 +90,11 @@ func getCommands() map[string]cliCommand {
 			name:        "help",
 			description: "Display help message",
 			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "List next location area",
+			callback:    commandMap,
 		},
 	}
 }
