@@ -14,7 +14,10 @@ func commandMap(config *pokeapi.Config) error {
 	}
 
 	// Update config's next and prev url
-	config.UpdateOnMap(config.Next)
+	err = config.UpdateOnMap(config.Next)
+	if err != nil {
+		return fmt.Errorf("error updating config on map: %w", err)
+	}
 
 	// Display location names to std.out
 	for _, location := range locations {

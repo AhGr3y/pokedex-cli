@@ -8,23 +8,44 @@ import (
 	"strings"
 )
 
-const BaseURL = "https://pokeapi.co/api/v2/"
-
 // Define custom error
 var ErrNilURL = errors.New("url is nil")
 var ErrURLWithoutOffset = errors.New("url does not have offset query")
 var ErrEmptyQueryParameter = errors.New("empty query parameter")
 
 type Config struct {
-	Next *url.URL
-	Prev *url.URL
+	LocationCount int
+	Next          *url.URL
+	Prev          *url.URL
 }
 
-func (c *Config) UpdateOnMap(nextURL *url.URL) {
-	// Get query offset of current location
-	if c.Next != nil {
-
+func (c *Config) UpdateOnMap(nextURL *url.URL) error {
+	if nextURL == nil {
+		return ErrNilURL
 	}
+
+	// Get query offset of nextURL
+	nextURLOffset, err := getOffsetFromURL(nextURL)
+	if err != nil {
+		return err
+	}
+
+	// Update c.Next and c.Prev based on nextURLOffset
+	prevURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, nextURLOffset-20)
+	prevURL, err := url.Parse(prevURLString)
+	if err != nil {
+		return fmt.Errorf("error parsing string to url: %w", err)
+	}
+	c.Prev = prevURL
+
+	nextNextURLString := fmt.Sprintf("%s/location-area/?offset=%d&limit=20", BaseURL, nextURLOffset+20)
+	nextNextURL, err := url.Parse(nextNextURLString)
+	if err != nil {
+		return fmt.Errorf("error parsing string to url: %w", err)
+	}
+	c.Next = nextNextURL
+
+	return nil
 }
 
 func getOffsetFromURL(url *url.URL) (int, error) {

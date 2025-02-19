@@ -13,17 +13,22 @@ import (
 
 func startRepl() {
 	// Initialize config
-	defaultLocationPath := "location-area/"
-	defaultLocationQuery := "?offset=0&limit=20"
-	defaultLocationURL, err := url.Parse(pokeapi.BaseURL + defaultLocationPath + defaultLocationQuery)
+	defaultLocationURL, err := url.Parse(pokeapi.BaseURL + "location-area/?offset=0&limit=20")
 	if err != nil {
 		fmt.Printf("Error parsing URL: %v", err)
 		os.Exit(1)
 	}
 
+	locationCount, err := pokeapi.GetLocationCount()
+	if err != nil {
+		fmt.Printf("Error retrieving location count: %v", err)
+		os.Exit(1)
+	}
+
 	config := &pokeapi.Config{
-		Next: defaultLocationURL,
-		Prev: nil,
+		LocationCount: locationCount,
+		Next:          defaultLocationURL,
+		Prev:          nil,
 	}
 
 	// Initialize scanner

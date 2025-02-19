@@ -46,3 +46,22 @@ func GetLocations(locationURL *url.URL) ([]Location, error) {
 
 	return locations, nil
 }
+
+func GetLocationCount() (int, error) {
+	// Retrieve location data from PokeAPI
+	resp, err := http.Get(BaseURL + "location-area/")
+	if err != nil {
+		return 0, fmt.Errorf("error fetching resource: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Decode json data into LocationData struct
+	var locationData LocationData
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&locationData)
+	if err != nil {
+		return 0, fmt.Errorf("error decoding json data: %w", err)
+	}
+
+	return locationData.Count, nil
+}
