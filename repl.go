@@ -13,7 +13,9 @@ import (
 
 func startRepl() {
 	// Initialize config
-	defaultLocationURL, err := url.Parse(pokeapi.BaseURL + "location-area/")
+	defaultLocationPath := "location-area/"
+	defaultLocationQuery := "?offset=0&limit=20"
+	defaultLocationURL, err := url.Parse(pokeapi.BaseURL + defaultLocationPath + defaultLocationQuery)
 	if err != nil {
 		fmt.Printf("Error parsing URL: %v", err)
 		os.Exit(1)
