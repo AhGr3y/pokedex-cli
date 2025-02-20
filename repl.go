@@ -54,8 +54,14 @@ func startRepl(config *config) {
 			continue
 		}
 
+		// Retrieve paramaters
+		var params []string
+		if len(cleanInputs) > 1 {
+			params = cleanInputs[1:]
+		}
+
 		// Execute command
-		if err := commandObj.callback(config); err != nil {
+		if err := commandObj.callback(config, params...); err != nil {
 			log.Fatalf("error during callback: %v", err)
 		}
 
@@ -69,7 +75,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -93,6 +99,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "List previous location area",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "List all pokemon in location explored",
+			callback:    commandExplore,
 		},
 	}
 }

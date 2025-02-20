@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func commandMap(config *config) error {
+func commandMap(config *config, params ...string) error {
 	// Handle last page
 	if config.nextURL != nil && config.prevURL != nil { // Prevent triggering on first map command
 		if config.nextURL == nil {
@@ -31,7 +31,7 @@ func commandMap(config *config) error {
 	return nil
 }
 
-func commandMapb(config *config) error {
+func commandMapb(config *config, params ...string) error {
 	// Handle first page
 	if config.prevURL == nil {
 		fmt.Println("You're on the first page!")

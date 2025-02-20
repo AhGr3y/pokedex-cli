@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func commandHelp(config *config) error {
+func commandHelp(config *config, params ...string) error {
 	var commandUsageText string
 	for _, v := range getCommands() {
 		commandUsageText += fmt.Sprintf("\n%s: %s", v.name, v.description)
