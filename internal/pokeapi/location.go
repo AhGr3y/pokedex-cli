@@ -3,7 +3,10 @@ package pokeapi
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+
+	"github.com/AhGr3y/pokedex-cli/internal/pokecache"
 )
 
 type LocationData struct {
@@ -16,10 +19,22 @@ type LocationData struct {
 	} `json:"results"`
 }
 
-func (pc PokeClient) GetLocationData(url *string) (LocationData, error) {
+func (pc PokeClient) GetLocationData(url *string, cache pokecache.Cache) (LocationData, error) {
 	fullURL := baseURL + "location-area/"
 	if url != nil {
 		fullURL = *url
+	}
+
+	// Return cached data if available
+	cachedData, ok := cache.Get(fullURL)
+	if ok {
+		var locationData LocationData
+		err := json.Unmarshal(cachedData, &locationData)
+		if err != nil {
+			return LocationData{}, fmt.Errorf("error unmarshalling ")
+		}
+
+		return locationData, nil
 	}
 
 	req, err := http.NewRequest("GET", fullURL, nil)
@@ -33,11 +48,22 @@ func (pc PokeClient) GetLocationData(url *string) (LocationData, error) {
 	}
 	defer res.Body.Close()
 
-	var locationData LocationData
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&locationData)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return LocationData{}, fmt.Errorf("error decoding response: %w", err)
+		return LocationData{}, fmt.Errorf("error reading response: %w", err)
+	}
+
+	// Add data to cache
+	// Don't need to disrupt program if fail to add
+	err = cache.Add(fullURL, data)
+	if err != nil {
+		fmt.Printf("error adding location data to cache: %v", err)
+	}
+
+	var locationData LocationData
+	err = json.Unmarshal(data, &locationData)
+	if err != nil {
+		return LocationData{}, fmt.Errorf("error unmarshalling ")
 	}
 
 	return locationData, nil
