@@ -14,7 +14,7 @@ func commandMap(config *config) error {
 	}
 
 	// Get LocationData from pokeapi
-	locationData, err := config.pokeapiClient.GetLocationData(config.nextURL, config.pokecache)
+	locationData, err := config.pokeapiClient.GetLocationData(config.nextURL)
 	if err != nil {
 		return fmt.Errorf("error getting location data: %w", err)
 	}
@@ -39,7 +39,7 @@ func commandMapb(config *config) error {
 	}
 
 	// Get LocationData from pokeapi
-	locationData, err := config.pokeapiClient.GetLocationData(config.prevURL, config.pokecache)
+	locationData, err := config.pokeapiClient.GetLocationData(config.prevURL)
 	if err != nil {
 		return fmt.Errorf("error getting location data: %w", err)
 	}

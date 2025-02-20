@@ -8,12 +8,10 @@ import (
 	"strings"
 
 	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
-	"github.com/AhGr3y/pokedex-cli/internal/pokecache"
 )
 
 type config struct {
 	pokeapiClient pokeapi.PokeClient
-	pokecache     pokecache.Cache
 	nextURL       *string
 	prevURL       *string
 }

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/AhGr3y/pokedex-cli/internal/pokecache"
 )
 
 type LocationData struct {
@@ -19,14 +17,14 @@ type LocationData struct {
 	} `json:"results"`
 }
 
-func (pc PokeClient) GetLocationData(url *string, cache pokecache.Cache) (LocationData, error) {
+func (pc PokeClient) GetLocationData(url *string) (LocationData, error) {
 	fullURL := baseURL + "location-area/"
 	if url != nil {
 		fullURL = *url
 	}
 
 	// Return cached data if available
-	cachedData, ok := cache.Get(fullURL)
+	cachedData, ok := pc.Cache.Get(fullURL)
 	if ok {
 		var locationData LocationData
 		err := json.Unmarshal(cachedData, &locationData)
@@ -55,7 +53,7 @@ func (pc PokeClient) GetLocationData(url *string, cache pokecache.Cache) (Locati
 
 	// Add data to cache
 	// Don't need to disrupt program if fail to add
-	err = cache.Add(fullURL, data)
+	err = pc.Cache.Add(fullURL, data)
 	if err != nil {
 		fmt.Printf("error adding location data to cache: %v", err)
 	}
