@@ -2,16 +2,10 @@ package main
 
 import (
 	"fmt"
-	"math"
-	"math/rand/v2"
+	"math/rand"
 	"strings"
 
 	"github.com/AhGr3y/pokedex-cli/internal/pokeapi"
-)
-
-const (
-	lowestBaseExp  = 36.0
-	highestBaseExp = 608.0
 )
 
 func commandCatch(config *config, params ...string) error {
@@ -41,26 +35,42 @@ func commandCatch(config *config, params ...string) error {
 
 func catchPokemon(pokemon pokeapi.Pokemon) bool {
 	normalizedBaseExp := normalizeBaseExp(pokemon.BaseExperience)
-	catchProbability := getCatchProbability(normalizedBaseExp)
-	rolledProbability := roundToOneDecimal(rand.Float64() * 100)
-	fmt.Printf("catch probability: %v%%\n", catchProbability)
+	rolledProbability := 100 - rand.Intn(101)
+	fmt.Printf("%v has %v base experience\n", pokemon.Name, pokemon.BaseExperience)
+	fmt.Printf("catch probability: %v%%\n", normalizedBaseExp)
 	fmt.Printf("rolled probability: %v%%\n", rolledProbability)
-	return rolledProbability <= catchProbability
+	return rolledProbability >= normalizedBaseExp
 }
 
-func getCatchProbability(normalizedBaseExp float64) float64 {
-	return roundToOneDecimal((1.0 - normalizedBaseExp) * 100)
-}
-
-func normalizeBaseExp(baseExp int) float64 {
-	return (float64(baseExp) - lowestBaseExp) / (highestBaseExp - lowestBaseExp)
-}
-
-// Assume x is between 0 and 100 inclusive
-func roundToOneDecimal(x float64) float64 {
-	if x > 0 {
-		return math.Round(x*10) / 10
+func normalizeBaseExp(baseExp int) int {
+	baseModifier := 100
+	if baseExp < 50 {
+		return baseModifier - 15
+	} else if baseExp < 100 {
+		return baseModifier - 20
+	} else if baseExp < 150 {
+		return baseModifier - 25
+	} else if baseExp < 200 {
+		return baseModifier - 30
+	} else if baseExp < 250 {
+		return baseModifier - 35
+	} else if baseExp < 300 {
+		return baseModifier - 40
+	} else if baseExp < 350 {
+		return baseModifier - 45
+	} else if baseExp < 400 {
+		return baseModifier - 50
+	} else if baseExp < 450 {
+		return baseModifier - 55
+	} else if baseExp < 500 {
+		return baseModifier - 60
+	} else if baseExp < 550 {
+		return baseModifier - 65
+	} else if baseExp < 600 {
+		return baseModifier - 70
+	} else if baseExp < 650 {
+		return baseModifier - 75
 	}
 
-	return x
+	return 0
 }

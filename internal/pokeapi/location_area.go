@@ -74,7 +74,7 @@ func (pc PokeClient) GetLocationAreaData(locationArea string) (LocationAreaData,
 	// Return cached data if available
 	if cacheData, ok := pc.Cache.Get(fullURL); ok {
 		var locationAreaData LocationAreaData
-		err = json.Unmarshal(cacheData, &locationAreaData)
+		err := json.Unmarshal(cacheData, &locationAreaData)
 		if err != nil {
 			return LocationAreaData{}, fmt.Errorf("error unmarshalling location area data: %w", err)
 		}

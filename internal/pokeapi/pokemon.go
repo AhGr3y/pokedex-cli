@@ -273,6 +273,16 @@ func (pc PokeClient) GetPokemon(name string) (Pokemon, error) {
 
 	fullURL := fmt.Sprintf("%spokemon/%s/", baseURL, name)
 
+	if pokemonData, ok := pc.Cache.Get(fullURL); ok {
+		var pokemon Pokemon
+		err := json.Unmarshal(pokemonData, &pokemon)
+		if err != nil {
+			return Pokemon{}, fmt.Errorf("error unmarshalling json to pokemon: %w", err)
+		}
+
+		return pokemon, nil
+	}
+
 	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
 		return Pokemon{}, fmt.Errorf("error creating request: %w", err)
@@ -293,6 +303,11 @@ func (pc PokeClient) GetPokemon(name string) (Pokemon, error) {
 	err = json.Unmarshal(data, &pokemon)
 	if err != nil {
 		return Pokemon{}, fmt.Errorf("error unmarshalling json to pokemon: %w", err)
+	}
+
+	err = pc.Cache.Add(fullURL, data)
+	if err != nil {
+		return Pokemon{}, fmt.Errorf("error adding pokemon to cache: %w", err)
 	}
 
 	return pokemon, nil
