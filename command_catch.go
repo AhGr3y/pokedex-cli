@@ -36,9 +36,6 @@ func commandCatch(config *config, params ...string) error {
 func catchPokemon(pokemon pokeapi.Pokemon) bool {
 	catchProbability := getCatchProbability(pokemon.BaseExperience)
 	rolledProbability := rand.Intn(101)
-	fmt.Printf("%v has %v base experience\n", pokemon.Name, pokemon.BaseExperience)
-	fmt.Printf("catch probability: %v%%\n", catchProbability)
-	fmt.Printf("rolled probability: %v%%\n", rolledProbability)
 	return rolledProbability <= catchProbability
 }
 
