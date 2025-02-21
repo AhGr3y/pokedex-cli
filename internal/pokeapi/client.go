@@ -8,13 +8,15 @@ import (
 )
 
 type PokeClient struct {
-	Cache  pokecache.Cache
-	Client http.Client
+	Pokedex map[string]Pokemon
+	Cache   pokecache.Cache
+	Client  http.Client
 }
 
 func NewClient(interval time.Duration) PokeClient {
 	return PokeClient{
-		Cache:  pokecache.NewCache(interval),
-		Client: http.Client{},
+		Pokedex: map[string]Pokemon{},
+		Cache:   pokecache.NewCache(interval),
+		Client:  http.Client{},
 	}
 }
