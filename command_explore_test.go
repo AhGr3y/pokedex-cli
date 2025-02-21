@@ -13,19 +13,19 @@ func TestFormatPokemonName(t *testing.T) {
 		},
 		"one word all lower": {
 			input:    "pikachu",
-			expected: " - Pikachu",
+			expected: " - pikachu",
 		},
 		"one word all upper": {
 			input:    "PIKACHU",
-			expected: " - PIKACHU",
+			expected: " - pikachu",
 		},
 		"many word all lower": {
 			input:    "pikachu is not cute",
-			expected: " - Pikachu is not cute",
+			expected: " - pikachu is not cute",
 		},
 		"many word all upper": {
 			input:    "PIKACHU IS NOT CUTE",
-			expected: " - PIKACHU IS NOT CUTE",
+			expected: " - pikachu is not cute",
 		},
 	}
 

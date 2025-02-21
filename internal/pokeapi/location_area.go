@@ -65,10 +65,21 @@ func (pc PokeClient) GetLocationAreaData(locationArea string) (LocationAreaData,
 		return LocationAreaData{}, fmt.Errorf("missing url")
 	}
 
-	url := fmt.Sprintf("%slocation-area/%s/", baseURL, locationArea)
-	req, err := http.NewRequest("GET", url, nil)
+	fullURL := fmt.Sprintf("%slocation-area/%s/", baseURL, locationArea)
+	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
 		return LocationAreaData{}, fmt.Errorf("error creating request: %w", err)
+	}
+
+	// Return cached data if available
+	if cacheData, ok := pc.Cache.Get(fullURL); ok {
+		var locationAreaData LocationAreaData
+		err = json.Unmarshal(cacheData, &locationAreaData)
+		if err != nil {
+			return LocationAreaData{}, fmt.Errorf("error unmarshalling location area data: %w", err)
+		}
+
+		return locationAreaData, nil
 	}
 
 	res, err := pc.Client.Do(req)
@@ -87,6 +98,8 @@ func (pc PokeClient) GetLocationAreaData(locationArea string) (LocationAreaData,
 	if err != nil {
 		return LocationAreaData{}, fmt.Errorf("error unmarshalling location area data: %w", err)
 	}
+
+	pc.Cache.Add(fullURL, data)
 
 	return locationAreaData, nil
 }

@@ -32,9 +32,5 @@ func formatPokemonName(name string) string {
 		return ""
 	}
 
-	// Make first letter uppercase
-	split := strings.Split(name, "")
-	firstLetterUpper := strings.ToUpper(split[0]) + strings.Join(split[1:], "")
-
-	return " - " + firstLetterUpper
+	return " - " + strings.ToLower(name)
 }
