@@ -34,15 +34,15 @@ func commandCatch(config *config, params ...string) error {
 }
 
 func catchPokemon(pokemon pokeapi.Pokemon) bool {
-	normalizedBaseExp := normalizeBaseExp(pokemon.BaseExperience)
-	rolledProbability := 100 - rand.Intn(101)
+	catchProbability := getCatchProbability(pokemon.BaseExperience)
+	rolledProbability := rand.Intn(101)
 	fmt.Printf("%v has %v base experience\n", pokemon.Name, pokemon.BaseExperience)
-	fmt.Printf("catch probability: %v%%\n", normalizedBaseExp)
+	fmt.Printf("catch probability: %v%%\n", catchProbability)
 	fmt.Printf("rolled probability: %v%%\n", rolledProbability)
-	return rolledProbability >= normalizedBaseExp
+	return rolledProbability <= catchProbability
 }
 
-func normalizeBaseExp(baseExp int) int {
+func getCatchProbability(baseExp int) int {
 	baseModifier := 100
 	if baseExp < 50 {
 		return baseModifier - 15
